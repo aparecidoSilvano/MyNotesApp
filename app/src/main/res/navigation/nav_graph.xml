@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/listNotesFragment">
+
+    <fragment
+        android:id="@+id/listNotesFragment"
+        android:name="com.silvanoalbuquerque.mynotesapp.ui.fragments.ListNotesFragment"
+        android:label="ListNotesFragment">
+        <action
+            android:id="@+id/action_listNotesFragment_to_createNoteFragment"
+            app:destination="@id/createNoteFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/createNoteFragment"
+        android:name="com.silvanoalbuquerque.mynotesapp.ui.fragments.CreateNoteFragment"
+        android:label="CreateNoteFragment">
+        <action
+            android:id="@+id/action_createNoteFragment_to_listNotesFragment"
+            app:destination="@id/listNotesFragment" />
+    </fragment>
+</navigation>
