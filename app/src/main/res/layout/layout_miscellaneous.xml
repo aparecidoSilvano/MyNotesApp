@@ -7,7 +7,7 @@
     android:background="@drawable/background_miscellaneous"
     android:orientation="vertical"
     app:behavior_peekHeight="@dimen/_40sdp"
-    app:layout_behavior="@string/bottom_sheet_behavior">
+    app:layout_behavior="com.silvanoalbuquerque.mynotesapp.ui.fragments.AutoCloseBottomSheetBehavior">
 
     <TextView
         android:id="@+id/textMiscellaneous"

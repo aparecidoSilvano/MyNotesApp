@@ -13,7 +13,18 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.silvanoalbuquerque.mynotesapp.R
 import com.silvanoalbuquerque.mynotesapp.db.entities.Note
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIFTH_INDEX
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIFTH_VALUE
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIRST_INDEX
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIRST_VALUE
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FOURTH_INDEX
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FOURTH_VALUE
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_SECOND_INDEX
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_SECOND_VALUE
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_THIRD_INDEX
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_THIRD_VALUE
 import com.silvanoalbuquerque.mynotesapp.other.Constants.NOTE_TEXTUAL_DATETIME_PATTERN
+import com.silvanoalbuquerque.mynotesapp.other.Constants.SELECTED_COLOR_DEFAULT_IMAGE_RESOURCE
 import com.silvanoalbuquerque.mynotesapp.ui.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_create_note.*
@@ -25,13 +36,29 @@ import java.util.*
 class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
 
     private val viewModel: MainViewModel by viewModels()
-    private lateinit var colorsPickersAvailable: List<ImageView>
+    private lateinit var availablePickers: List<ImageView>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initUi()
         setupViewModelObservables()
+    }
+
+    private fun initUi() {
+        availablePickers = getAvailablePickers()
+
+        textDateTime.text =
+            SimpleDateFormat(NOTE_TEXTUAL_DATETIME_PATTERN, Locale.getDefault()).format(Date())
+
+        buttonSave.setOnClickListener { createNote() }
+        imageBack.setOnClickListener { backToNotesListView() }
+        handlePickColorClick()
+
+        val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> =
+            BottomSheetBehavior.from(layoutMiscellaneous) as AutoCloseBottomSheetBehavior
+
+        layoutMiscellaneous.setOnClickListener { handleBottomSheetClick(bottomSheetBehavior) }
     }
 
     private fun setupViewModelObservables() {
@@ -47,77 +74,61 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
         }
     }
 
-    private fun initUi() {
-        textDateTime.text =
-            SimpleDateFormat(NOTE_TEXTUAL_DATETIME_PATTERN, Locale.getDefault()).format(Date())
-
-        buttonSave.setOnClickListener { createNote() }
-        imageBack.setOnClickListener { backToNotesListView() }
-
-        val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> =
-            BottomSheetBehavior.from(layoutMiscellaneous)
-
-        layoutMiscellaneous.setOnClickListener {
-            if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            } else {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            }
-        }
-
-        colorsPickersAvailable = listOf<ImageView>(
-            firstImageColor,
-            secondImageColor,
-            thirdImageColor,
-            fourthImageColor,
-            fifthImageColor
-        )
-
-        handlePickColorClick()
-    }
-
-    private fun markSelectedColor(selectedIndex: Int) {
-        for (i in colorsPickersAvailable.indices) {
-            if (selectedIndex == i) {
-                colorsPickersAvailable[i].setImageResource(R.drawable.ic_done)
-            } else {
-                colorsPickersAvailable[i].setImageResource(0)
-            }
+    private fun handleBottomSheetClick(bottomSheetBehavior: BottomSheetBehavior<LinearLayout>) {
+        if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        } else {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }
+
+    private fun getAvailablePickers() = listOf<ImageView>(
+        firstImageColor,
+        secondImageColor,
+        thirdImageColor,
+        fourthImageColor,
+        fifthImageColor
+    )
 
     private fun handlePickColorClick() {
-
         firstViewColor.setOnClickListener {
-            markSelectedColor(0)
-            viewModel.selectedColor.value = "#333333"
+            markSelectedColor(COLOR_PICKER_FIRST_INDEX)
+            viewModel.setSelectedColor(COLOR_PICKER_FIRST_VALUE)
         }
 
         secondViewColor.setOnClickListener {
-            markSelectedColor(1)
-            viewModel.selectedColor.value = "#FDBE3B"
+            markSelectedColor(COLOR_PICKER_SECOND_INDEX)
+            viewModel.setSelectedColor(COLOR_PICKER_SECOND_VALUE)
         }
 
         thirdImageColor.setOnClickListener {
-            markSelectedColor(2)
-            viewModel.selectedColor.value = "#FF4842"
+            markSelectedColor(COLOR_PICKER_THIRD_INDEX)
+            viewModel.setSelectedColor(COLOR_PICKER_THIRD_VALUE)
         }
 
         fourthViewColor.setOnClickListener {
-            markSelectedColor(3)
-            viewModel.selectedColor.value = "#3A52FC"
+            markSelectedColor(COLOR_PICKER_FOURTH_INDEX)
+            viewModel.setSelectedColor(COLOR_PICKER_FOURTH_VALUE)
         }
 
         fifthViewColor.setOnClickListener {
-            markSelectedColor(4)
-            viewModel.selectedColor.value = "#000000"
+            markSelectedColor(COLOR_PICKER_FIFTH_INDEX)
+            viewModel.setSelectedColor(COLOR_PICKER_FIFTH_VALUE)
+        }
+    }
+
+    private fun markSelectedColor(selectedIndex: Int) {
+        for (i in availablePickers.indices) {
+            if (selectedIndex == i) {
+                availablePickers[i].setImageResource(R.drawable.ic_done)
+            } else {
+                availablePickers[i].setImageResource(SELECTED_COLOR_DEFAULT_IMAGE_RESOURCE)
+            }
         }
     }
 
     private fun backToNotesListView() {
-        val backAction =
-            CreateNoteFragmentDirections.actionCreateNoteFragmentToListNotesFragment()
-        findNavController().navigate(backAction)
+        findNavController().popBackStack()
     }
 
     private fun createNote() {
@@ -134,7 +145,7 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
 
         val note = Note(
             title = title,
-            color = viewModel.selectedColor.value ?: "333333",
+            color = viewModel.selectedColor.value ?: COLOR_PICKER_FIRST_VALUE,
             datetime = dateTime,
             imagePath = "",
             subtitle = subtitle,

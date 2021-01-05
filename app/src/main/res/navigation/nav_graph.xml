@@ -15,9 +15,5 @@
     <fragment
         android:id="@+id/createNoteFragment"
         android:name="com.silvanoalbuquerque.mynotesapp.ui.fragments.CreateNoteFragment"
-        android:label="CreateNoteFragment">
-        <action
-            android:id="@+id/action_createNoteFragment_to_listNotesFragment"
-            app:destination="@id/listNotesFragment" />
-    </fragment>
+        android:label="CreateNoteFragment" />
 </navigation>

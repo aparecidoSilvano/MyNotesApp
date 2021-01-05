@@ -3,6 +3,7 @@ package com.silvanoalbuquerque.mynotesapp.ui.viewmodels
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.silvanoalbuquerque.mynotesapp.db.entities.Note
+import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIRST_VALUE
 import com.silvanoalbuquerque.mynotesapp.repositories.NotesRepository
 import kotlinx.coroutines.launch
 
@@ -18,7 +19,9 @@ class MainViewModel @ViewModelInject constructor(
     val finishedSavingNote: LiveData<Boolean>
         get() = _finishedSavingNote
 
-    val selectedColor = MutableLiveData<String>()
+    private val _selectedColor = MutableLiveData<String>()
+    val selectedColor: LiveData<String>
+        get() = _selectedColor
 
     init {
         _notes.addSource(notesRepository.getAllNotes()) { result ->
@@ -27,12 +30,16 @@ class MainViewModel @ViewModelInject constructor(
             }
         }
 
-        selectedColor.value = "#333333"
+        _selectedColor.value = COLOR_PICKER_FIRST_VALUE
     }
 
     fun insertNote(note: Note) = viewModelScope.launch {
         notesRepository.insertNote(note)
 
         _finishedSavingNote.value = true
+    }
+
+    fun setSelectedColor(selectedColor: String) {
+        _selectedColor.postValue(selectedColor)
     }
 }
