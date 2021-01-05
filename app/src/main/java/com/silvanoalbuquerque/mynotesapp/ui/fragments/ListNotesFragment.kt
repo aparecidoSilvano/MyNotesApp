@@ -5,16 +5,18 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.silvanoalbuquerque.mynotesapp.R
+import com.silvanoalbuquerque.mynotesapp.adapters.NotesAdapter
 import com.silvanoalbuquerque.mynotesapp.ui.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_list_notes.*
-import timber.log.Timber
 
 @AndroidEntryPoint
 class ListNotesFragment : Fragment(R.layout.fragment_list_notes) {
 
     private val viewModel: MainViewModel by viewModels()
+    lateinit var notesAdapter: NotesAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -25,7 +27,17 @@ class ListNotesFragment : Fragment(R.layout.fragment_list_notes) {
         }
 
         viewModel.notes.observe(viewLifecycleOwner) { notes ->
-            Timber.i("Notes found.lenth= ${notes.size}")
+            notesAdapter.submitList(notes)
+        }
+
+        setupRecyclerView()
+    }
+
+    private fun setupRecyclerView() {
+        notesAdapter = NotesAdapter()
+        notesRecyclerView.apply {
+            adapter = notesAdapter
+            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         }
     }
 }

@@ -36,7 +36,9 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
 
         viewModel.finishedSavingNote.observe(viewLifecycleOwner) {
             if (it) {
-                findNavController().navigate(R.id.action_createNoteFragment_to_listNotesFragment)
+                val backAction =
+                    CreateNoteFragmentDirections.actionCreateNoteFragmentToListNotesFragment()
+                findNavController().navigate(backAction)
             }
         }
 
