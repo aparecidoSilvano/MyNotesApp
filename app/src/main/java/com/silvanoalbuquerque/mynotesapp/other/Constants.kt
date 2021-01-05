@@ -21,4 +21,7 @@ object Constants {
 
     const val COLOR_PICKER_FIFTH_INDEX = 4
     const val COLOR_PICKER_FIFTH_VALUE = "#000000"
+
+    const val REQUEST_CODE_STORAGE_PERMISSION = 1
+    const val REQUEST_CODE_SELECT_IMAGE = 2
 }

@@ -1,5 +1,6 @@
 package com.silvanoalbuquerque.mynotesapp.adapters
 
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
@@ -52,7 +53,7 @@ class NotesAdapter : RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
             textTitle.text = note.title
 
             note.subtitle.apply {
-                if(isEmpty()) {
+                if (isEmpty()) {
                     textSubtitle.visibility = View.GONE
                 } else {
                     textSubtitle.visibility = View.VISIBLE
@@ -70,6 +71,13 @@ class NotesAdapter : RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
             val gradientDrawable = layoutNote.background as GradientDrawable
             if (note.color.isNotEmpty()) {
                 gradientDrawable.setColor(Color.parseColor(note.color))
+            }
+
+            if (note.imagePath.isNotEmpty()) {
+                imageNote.setImageBitmap(BitmapFactory.decodeFile(note.imagePath))
+                imageNote.visibility = View.VISIBLE
+            } else {
+                imageNote.visibility = View.GONE
             }
         }
     }

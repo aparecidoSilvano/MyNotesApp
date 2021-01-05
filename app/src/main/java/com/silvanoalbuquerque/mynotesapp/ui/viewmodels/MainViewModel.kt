@@ -23,6 +23,10 @@ class MainViewModel @ViewModelInject constructor(
     val selectedColor: LiveData<String>
         get() = _selectedColor
 
+    private val _selectedImagePath = MutableLiveData<String>()
+    val selectedImagePath: LiveData<String>
+        get() = _selectedImagePath
+
     init {
         _notes.addSource(notesRepository.getAllNotes()) { result ->
             result?.let {
@@ -41,5 +45,9 @@ class MainViewModel @ViewModelInject constructor(
 
     fun setSelectedColor(selectedColor: String) {
         _selectedColor.postValue(selectedColor)
+    }
+
+    fun setSelectedImagePath(selectedImagePath: String) {
+        _selectedImagePath.postValue(selectedImagePath)
     }
 }

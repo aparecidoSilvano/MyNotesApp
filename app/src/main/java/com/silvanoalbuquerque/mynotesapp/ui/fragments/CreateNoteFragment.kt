@@ -1,11 +1,21 @@
 package com.silvanoalbuquerque.mynotesapp.ui.fragments
 
+import android.Manifest
+import android.app.Activity.RESULT_OK
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -24,6 +34,8 @@ import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_SECOND_VAL
 import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_THIRD_INDEX
 import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_THIRD_VALUE
 import com.silvanoalbuquerque.mynotesapp.other.Constants.NOTE_TEXTUAL_DATETIME_PATTERN
+import com.silvanoalbuquerque.mynotesapp.other.Constants.REQUEST_CODE_SELECT_IMAGE
+import com.silvanoalbuquerque.mynotesapp.other.Constants.REQUEST_CODE_STORAGE_PERMISSION
 import com.silvanoalbuquerque.mynotesapp.other.Constants.SELECTED_COLOR_DEFAULT_IMAGE_RESOURCE
 import com.silvanoalbuquerque.mynotesapp.ui.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -59,6 +71,89 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
             BottomSheetBehavior.from(layoutMiscellaneous) as AutoCloseBottomSheetBehavior
 
         layoutMiscellaneous.setOnClickListener { handleBottomSheetClick(bottomSheetBehavior) }
+
+        layoutAddImage.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+            if (ContextCompat.checkSelfPermission(
+                    requireContext().applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    REQUEST_CODE_STORAGE_PERMISSION
+                )
+            } else {
+                selectImage()
+            }
+        }
+    }
+
+    private fun selectImage() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+
+        //if (intent.resolveActivity(requireActivity().packageManager) != null) { TODO check how to do that on Android 11
+        requireActivity().startActivityFromFragment(this, intent, REQUEST_CODE_SELECT_IMAGE)
+        //}
+    }
+
+    private fun getPathFromUrl(contentUrl: Uri): String {
+        val filePath: String
+        val cursor = requireActivity().contentResolver.query(contentUrl, null, null, null, null)
+
+        if (cursor == null) {
+            filePath = contentUrl.path.toString()
+        } else {
+            cursor.moveToFirst()
+
+            val index = cursor.getColumnIndex("_data")
+            filePath = cursor.getString(index)
+            cursor.close()
+        }
+
+        return filePath
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CODE_SELECT_IMAGE && resultCode == RESULT_OK) {
+            data?.let {
+                val selectedImageUri = it.data
+                if (selectedImageUri != null) {
+                    try {
+
+                        val inputStream =
+                            requireActivity().contentResolver.openInputStream(selectedImageUri)
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        imageNote.setImageBitmap(bitmap)
+                        imageNote.visibility = View.VISIBLE
+
+                        viewModel.setSelectedImagePath(getPathFromUrl(selectedImageUri))
+
+                    } catch (ex: Exception) {
+                        Toast.makeText(requireContext(), ex.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.isNotEmpty()) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                selectImage()
+            } else {
+                Snackbar.make(requireView(), "Permission Denied!", Snackbar.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupViewModelObservables() {
@@ -147,7 +242,7 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
             title = title,
             color = viewModel.selectedColor.value ?: COLOR_PICKER_FIRST_VALUE,
             datetime = dateTime,
-            imagePath = "",
+            imagePath = viewModel.selectedImagePath.value ?: "",
             subtitle = subtitle,
             noteText = noteText,
             webLink = ""

@@ -16,4 +16,7 @@
     <string name="miscellaneous">Miscellaneous</string>
     <string name="miscellaneous_first_color_description">First color</string>
     <string name="miscellaneous_pick_color_label">Pick Color</string>
+    <string name="description_create_note_choose_image">Choose an image for this note</string>
+    <string name="description_create_note_click_to_add_image">Click to add image</string>
+    <string name="create_note_label_add_image">Add image</string>
 </resources>
