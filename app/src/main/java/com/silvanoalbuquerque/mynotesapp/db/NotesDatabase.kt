@@ -12,5 +12,5 @@ import com.silvanoalbuquerque.mynotesapp.db.entities.Note
 @TypeConverters(Converters::class)
 abstract class NotesDatabase : RoomDatabase() {
 
-    abstract fun getNotesDao(): NotesDAO
+    abstract fun getNotesDao(): NoteDAO
 }

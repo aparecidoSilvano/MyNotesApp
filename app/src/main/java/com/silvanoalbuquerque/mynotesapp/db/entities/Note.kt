@@ -7,7 +7,7 @@ import java.util.*
 @Entity(tableName = "notes_table")
 data class Note(
     @PrimaryKey(autoGenerate = true)
-    val id: Long,
+    val id: Long? = null,
     val title: String,
     val subtitle: String,
     val datetime: Calendar,
