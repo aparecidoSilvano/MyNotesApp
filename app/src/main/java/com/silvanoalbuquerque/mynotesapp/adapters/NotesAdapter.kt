@@ -1,5 +1,7 @@
 package com.silvanoalbuquerque.mynotesapp.adapters
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,6 +66,11 @@ class NotesAdapter : RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
             ).format(
                 note.datetime.time
             )
+
+            val gradientDrawable = layoutNote.background as GradientDrawable
+            if (note.color.isNotEmpty()) {
+                gradientDrawable.setColor(Color.parseColor(note.color))
+            }
         }
     }
 

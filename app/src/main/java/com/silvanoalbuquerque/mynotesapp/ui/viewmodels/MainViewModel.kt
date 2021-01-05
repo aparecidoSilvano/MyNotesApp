@@ -18,12 +18,16 @@ class MainViewModel @ViewModelInject constructor(
     val finishedSavingNote: LiveData<Boolean>
         get() = _finishedSavingNote
 
+    val selectedColor = MutableLiveData<String>()
+
     init {
         _notes.addSource(notesRepository.getAllNotes()) { result ->
             result?.let {
                 _notes.value = it
             }
         }
+
+        selectedColor.value = "#333333"
     }
 
     fun insertNote(note: Note) = viewModelScope.launch {

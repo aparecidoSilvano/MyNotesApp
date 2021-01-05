@@ -13,4 +13,7 @@
     <string name="hint_note_subtitle">Note Subtitle</string>
     <string name="hint_type_note_here">Type note here...</string>
     <string name="alert_empty_note_title">Empty title, please enter a title</string>
+    <string name="miscellaneous">Miscellaneous</string>
+    <string name="miscellaneous_first_color_description">First color</string>
+    <string name="miscellaneous_pick_color_label">Pick Color</string>
 </resources>
