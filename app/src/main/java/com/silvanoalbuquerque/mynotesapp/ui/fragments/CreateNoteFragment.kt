@@ -6,14 +6,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Patterns
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -33,6 +35,7 @@ import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_SECOND_IND
 import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_SECOND_VALUE
 import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_THIRD_INDEX
 import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_THIRD_VALUE
+import com.silvanoalbuquerque.mynotesapp.other.Constants.IMAGE_FILE_CURSOR_COLUMN_INDEX
 import com.silvanoalbuquerque.mynotesapp.other.Constants.NOTE_TEXTUAL_DATETIME_PATTERN
 import com.silvanoalbuquerque.mynotesapp.other.Constants.REQUEST_CODE_SELECT_IMAGE
 import com.silvanoalbuquerque.mynotesapp.other.Constants.REQUEST_CODE_STORAGE_PERMISSION
@@ -40,6 +43,7 @@ import com.silvanoalbuquerque.mynotesapp.other.Constants.SELECTED_COLOR_DEFAULT_
 import com.silvanoalbuquerque.mynotesapp.ui.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_create_note.*
+import kotlinx.android.synthetic.main.layout_add_url.*
 import kotlinx.android.synthetic.main.layout_miscellaneous.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -48,6 +52,8 @@ import java.util.*
 class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
 
     private val viewModel: MainViewModel by viewModels()
+    private var dialogAddURL: AlertDialog? = null
+
     private lateinit var availablePickers: List<ImageView>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -88,6 +94,11 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
                 selectImage()
             }
         }
+
+        layoutAddUrl.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            showAddURLDialog()
+        }
     }
 
     private fun selectImage() {
@@ -107,7 +118,7 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
         } else {
             cursor.moveToFirst()
 
-            val index = cursor.getColumnIndex("_data")
+            val index = cursor.getColumnIndex(IMAGE_FILE_CURSOR_COLUMN_INDEX)
             filePath = cursor.getString(index)
             cursor.close()
         }
@@ -151,7 +162,7 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 selectImage()
             } else {
-                Snackbar.make(requireView(), "Permission Denied!", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(requireView(), R.string.alert_permisison_denied, Snackbar.LENGTH_SHORT).show()
             }
         }
     }
@@ -166,6 +177,11 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
         viewModel.selectedColor.observe(viewLifecycleOwner) {
             val gradientDrawable = viewSubtitleIndicator.background as GradientDrawable
             gradientDrawable.setColor(Color.parseColor(it))
+        }
+
+        viewModel.noteLink.observe(viewLifecycleOwner) {
+            textWebURL.text = it
+            layoutWebURL.visibility = View.VISIBLE
         }
     }
 
@@ -245,9 +261,52 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
             imagePath = viewModel.selectedImagePath.value ?: "",
             subtitle = subtitle,
             noteText = noteText,
-            webLink = ""
+            webLink = viewModel.noteLink.value ?: ""
         )
 
         viewModel.insertNote(note)
+    }
+
+    private fun showAddURLDialog() {
+        if (dialogAddURL == null) {
+            val builder = AlertDialog.Builder(requireActivity())
+            val view = LayoutInflater.from(requireContext()).inflate(
+                R.layout.layout_add_url,
+                layoutAddUrlContainer
+            )
+            builder.setView(view)
+
+            dialogAddURL = builder.create()
+            dialogAddURL?.let {
+                if (it.window != null) {
+                    it.window!!.setBackgroundDrawable(ColorDrawable(0))
+                }
+
+                val inputUrl = view.findViewById<EditText>(R.id.inputUrl)
+                inputUrl.requestFocus()
+
+                val buttonAdd = view.findViewById<Button>(R.id.buttonAdd)
+                buttonAdd.setOnClickListener {
+                    val urlValue = inputUrl.text.toString()
+
+                    if (urlValue.trim().isEmpty()) {
+                        Snackbar.make(view, R.string.alert_enter_url, Snackbar.LENGTH_SHORT).show()
+                    } else if (!Patterns.WEB_URL.matcher(urlValue).matches()) {
+                        Snackbar.make(view, R.string.alert_enter_valid_url, Snackbar.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        viewModel.setWebLink(urlValue)
+                        dialogAddURL!!.dismiss()
+                    }
+                }
+
+                val buttonCancel = view.findViewById<Button>(R.id.buttonCancel)
+                buttonCancel.setOnClickListener {
+                    dialogAddURL!!.dismiss()
+                }
+            }
+        }
+
+        dialogAddURL!!.show()
     }
 }

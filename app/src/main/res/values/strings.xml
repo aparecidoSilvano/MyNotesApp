@@ -11,12 +11,21 @@
     <string name="description_save_note">Save note</string>
     <string name="hint_note_title">Note Title</string>
     <string name="hint_note_subtitle">Note Subtitle</string>
-    <string name="hint_type_note_here">Type note here...</string>
+    <string name="hint_type_note_here">Type note here…</string>
     <string name="alert_empty_note_title">Empty title, please enter a title</string>
-    <string name="miscellaneous">Miscellaneous</string>
+    <string name="miscellaneous_title">Miscellaneous</string>
     <string name="miscellaneous_first_color_description">First color</string>
     <string name="miscellaneous_pick_color_label">Pick Color</string>
     <string name="description_create_note_choose_image">Choose an image for this note</string>
     <string name="description_create_note_click_to_add_image">Click to add image</string>
     <string name="create_note_label_add_image">Add image</string>
+    <string name="description_create_note_click_to_add_link">Add a link for this note</string>
+    <string name="create_note_label_add_link">Add URL</string>
+    <string name="hint_enter_url">Enter URL</string>
+    <string name="description_add_link">Add link</string>
+    <string name="button_add">Add</string>
+    <string name="button_cancel_dialog">Cancel</string>
+    <string name="alert_enter_valid_url">Enter valid URL</string>
+    <string name="alert_enter_url">Enter URL</string>
+    <string name="alert_permisison_denied">Permission Denied!</string>
 </resources>

@@ -17,7 +17,7 @@
         android:fontFamily="@font/ubuntu_medium"
         android:gravity="center"
         android:includeFontPadding="false"
-        android:text="@string/miscellaneous"
+        android:text="@string/miscellaneous_title"
         android:textColor="@color/colorWhite"
         android:textSize="@dimen/_13ssp" />
 
@@ -164,6 +164,35 @@
             android:fontFamily="@font/ubuntu_medium"
             android:includeFontPadding="false"
             android:text="@string/create_note_label_add_image"
+            android:textColor="@color/colorIcons"
+            android:textSize="@dimen/_12ssp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutAddUrl"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginBottom="@dimen/_10sdp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        tools:ignore="UseCompoundDrawables">
+
+        <ImageView
+            android:layout_width="@dimen/_22sdp"
+            android:layout_height="@dimen/_22sdp"
+            android:contentDescription="@string/description_create_note_click_to_add_link"
+            android:src="@drawable/ic_web_link"
+            app:tint="@color/colorIcons" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:fontFamily="@font/ubuntu_medium"
+            android:includeFontPadding="false"
+            android:text="@string/create_note_label_add_link"
             android:textColor="@color/colorIcons"
             android:textSize="@dimen/_12ssp" />
     </LinearLayout>

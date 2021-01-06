@@ -24,4 +24,6 @@ object Constants {
 
     const val REQUEST_CODE_STORAGE_PERMISSION = 1
     const val REQUEST_CODE_SELECT_IMAGE = 2
+
+    const val IMAGE_FILE_CURSOR_COLUMN_INDEX = "_data"
 }

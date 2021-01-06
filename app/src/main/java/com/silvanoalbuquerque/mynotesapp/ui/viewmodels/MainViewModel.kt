@@ -27,6 +27,10 @@ class MainViewModel @ViewModelInject constructor(
     val selectedImagePath: LiveData<String>
         get() = _selectedImagePath
 
+    private val _noteLink = MutableLiveData<String>()
+    val noteLink: LiveData<String>
+        get() = _noteLink
+
     init {
         _notes.addSource(notesRepository.getAllNotes()) { result ->
             result?.let {
@@ -49,5 +53,9 @@ class MainViewModel @ViewModelInject constructor(
 
     fun setSelectedImagePath(selectedImagePath: String) {
         _selectedImagePath.postValue(selectedImagePath)
+    }
+
+    fun setWebLink(link: String) {
+        _noteLink.postValue(link)
     }
 }
