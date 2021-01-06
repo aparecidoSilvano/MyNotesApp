@@ -7,10 +7,12 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.silvanoalbuquerque.mynotesapp.R
+import com.silvanoalbuquerque.mynotesapp.adapters.NoteListener
 import com.silvanoalbuquerque.mynotesapp.adapters.NotesAdapter
 import com.silvanoalbuquerque.mynotesapp.ui.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_list_notes.*
+import timber.log.Timber
 
 @AndroidEntryPoint
 class ListNotesFragment : Fragment(R.layout.fragment_list_notes) {
@@ -34,7 +36,10 @@ class ListNotesFragment : Fragment(R.layout.fragment_list_notes) {
     }
 
     private fun setupRecyclerView() {
-        notesAdapter = NotesAdapter()
+        notesAdapter = NotesAdapter(NoteListener {
+            noteId ->  Timber.i("Click at note = $noteId")
+        })
+
         notesRecyclerView.apply {
             adapter = notesAdapter
             layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)

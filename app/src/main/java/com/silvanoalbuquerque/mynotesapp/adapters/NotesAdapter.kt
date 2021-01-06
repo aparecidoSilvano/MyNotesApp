@@ -6,8 +6,8 @@ import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.silvanoalbuquerque.mynotesapp.R
 import com.silvanoalbuquerque.mynotesapp.db.entities.Note
@@ -16,73 +16,77 @@ import kotlinx.android.synthetic.main.item_note.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NotesAdapter : RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
+class NotesAdapter(private val clickListener: NoteListener) :
+    ListAdapter<Note, NotesAdapter.ViewHolder>(NoteDiffCallback()) {
 
-    class NoteViewHolder(viewItem: View) : RecyclerView.ViewHolder(viewItem)
+    class ViewHolder private constructor(viewItem: View) : RecyclerView.ViewHolder(viewItem) {
+        fun bind(listener: NoteListener, item: Note) {
+            itemView.apply {
+                setOnClickListener {
+                    listener.onClick(item)
+                }
 
-    private val differCallback = object : DiffUtil.ItemCallback<Note>() {
-        override fun areItemsTheSame(oldItem: Note, newItem: Note): Boolean {
-            return oldItem == newItem
-        }
+                textTitle.text = item.title
 
-        override fun areContentsTheSame(oldItem: Note, newItem: Note): Boolean {
-            return oldItem.title == newItem.title && oldItem.id == newItem.id
-        }
-    }
+                item.subtitle.apply {
+                    if (isEmpty()) {
+                        textSubtitle.visibility = View.GONE
+                    } else {
+                        textSubtitle.visibility = View.VISIBLE
+                        textSubtitle.text = item.subtitle
+                    }
+                }
 
-    private val differ = AsyncListDiffer(this, differCallback)
+                textDateTime.text = SimpleDateFormat(
+                    Constants.NOTE_TEXTUAL_DATETIME_PATTERN,
+                    Locale.getDefault()
+                ).format(
+                    item.datetime.time
+                )
 
-    fun submitList(notes: List<Note>) {
-        differ.submitList(notes)
-    }
+                val gradientDrawable = layoutNote.background as GradientDrawable
+                if (item.color.isNotEmpty()) {
+                    gradientDrawable.setColor(Color.parseColor(item.color))
+                }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-        return NoteViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.item_note,
-                parent,
-                false
-            )
-        )
-    }
-
-    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
-        val note = differ.currentList[position]
-
-        holder.itemView.apply {
-            textTitle.text = note.title
-
-            note.subtitle.apply {
-                if (isEmpty()) {
-                    textSubtitle.visibility = View.GONE
+                if (item.imagePath.isNotEmpty()) {
+                    imageNote.setImageBitmap(BitmapFactory.decodeFile(item.imagePath))
+                    imageNote.visibility = View.VISIBLE
                 } else {
-                    textSubtitle.visibility = View.VISIBLE
-                    textSubtitle.text = note.subtitle
+                    imageNote.visibility = View.GONE
                 }
             }
+        }
 
-            textDateTime.text = SimpleDateFormat(
-                Constants.NOTE_TEXTUAL_DATETIME_PATTERN,
-                Locale.getDefault()
-            ).format(
-                note.datetime.time
-            )
-
-            val gradientDrawable = layoutNote.background as GradientDrawable
-            if (note.color.isNotEmpty()) {
-                gradientDrawable.setColor(Color.parseColor(note.color))
-            }
-
-            if (note.imagePath.isNotEmpty()) {
-                imageNote.setImageBitmap(BitmapFactory.decodeFile(note.imagePath))
-                imageNote.visibility = View.VISIBLE
-            } else {
-                imageNote.visibility = View.GONE
+        companion object {
+            fun from(parent: ViewGroup): ViewHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val view = layoutInflater.inflate(R.layout.item_note, parent, false)
+                return ViewHolder(view)
             }
         }
     }
 
-    override fun getItemCount(): Int {
-        return differ.currentList.size
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder.from(parent)
     }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val note = getItem(position)
+        holder.bind(clickListener, note)
+    }
+}
+
+class NoteDiffCallback : DiffUtil.ItemCallback<Note>() {
+    override fun areItemsTheSame(oldItem: Note, newItem: Note): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+    override fun areContentsTheSame(oldItem: Note, newItem: Note): Boolean {
+        return oldItem == newItem
+    }
+}
+
+class NoteListener(val clickListener: (noteId: Long) -> Unit) {
+    fun onClick(note: Note) = clickListener(note.id!!)
 }
