@@ -1,62 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layoutNote"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/_12sdp"
-    android:layout_marginTop="@dimen/_12sdp"
-    android:background="@drawable/background_note"
-    android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/imageNote"
+    <data>
+
+        <variable
+            name="note"
+            type="com.silvanoalbuquerque.mynotesapp.db.entities.Note" />
+
+        <variable
+            name="clickListener"
+            type="com.silvanoalbuquerque.mynotesapp.adapters.NoteListener" />
+    </data>
+
+    <LinearLayout
+        android:id="@+id/layoutNote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:visibility="gone"
-        app:riv_corner_radius_top_left="@dimen/_10sdp"
-        app:riv_corner_radius_top_right="@dimen/_10sdp" />
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:background="@drawable/background_note"
+        android:onClick="@{() -> clickListener.onClick(note)}"
+        android:orientation="vertical"
+        app:noteColor="@{note}">
 
-    <TextView
-        android:id="@+id/textTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:fontFamily="@font/ubuntu_bold"
-        android:includeFontPadding="false"
-        android:textColor="@color/colorWhite"
-        android:textSize="@dimen/_13ssp"
-        tools:text="Title" />
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/imageNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            app:noteImage="@{note}"
+            app:riv_corner_radius_top_left="@dimen/_10sdp"
+            app:riv_corner_radius_top_right="@dimen/_10sdp" />
 
-    <TextView
-        android:id="@+id/textSubtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:fontFamily="@font/ubuntu_regular"
-        android:includeFontPadding="false"
-        android:textColor="@color/colorSubtitleText"
-        android:textSize="@dimen/_12ssp"
-        tools:text="subtitle" />
+        <TextView
+            android:id="@+id/textTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:fontFamily="@font/ubuntu_bold"
+            android:includeFontPadding="false"
+            android:text="@{note.title}"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/_13ssp"
+            tools:text="Title" />
 
-    <TextView
-        android:id="@+id/textDateTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginBottom="@dimen/_8sdp"
-        android:fontFamily="@font/ubuntu_regular"
-        android:includeFontPadding="false"
-        android:textColor="@color/colorSubtitleText"
-        android:textSize="@dimen/_7ssp"
-        tools:text="data" />
+        <TextView
+            android:id="@+id/textSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:fontFamily="@font/ubuntu_regular"
+            android:includeFontPadding="false"
+            android:textColor="@color/colorSubtitleText"
+            android:textSize="@dimen/_12ssp"
+            app:noteSubtitle="@{note}"
+            tools:text="subtitle" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/textDateTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:fontFamily="@font/ubuntu_regular"
+            android:includeFontPadding="false"
+            android:textColor="@color/colorSubtitleText"
+            android:textSize="@dimen/_7ssp"
+            app:noteDateTime="@{note}"
+            tools:text="data" />
+
+    </LinearLayout>
+
+</layout>
