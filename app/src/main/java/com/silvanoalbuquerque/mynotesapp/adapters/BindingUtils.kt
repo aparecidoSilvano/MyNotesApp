@@ -1,31 +1,35 @@
 package com.silvanoalbuquerque.mynotesapp.adapters
 
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
-import com.makeramen.roundedimageview.RoundedImageView
 import com.silvanoalbuquerque.mynotesapp.db.entities.Note
+import com.silvanoalbuquerque.mynotesapp.db.entities.NoteColor
 import com.silvanoalbuquerque.mynotesapp.other.Constants.NOTE_TEXTUAL_DATETIME_PATTERN
 import java.text.SimpleDateFormat
 import java.util.*
 
 @BindingAdapter("noteColor")
-fun View.setNoteColor(item: Note?) {
-    item?.let {
+fun View.setNoteColor(color: NoteColor?) {
+    color?.let {
         val gradientDrawable = background as GradientDrawable
-        if (item.color.isNotEmpty()) {
-            gradientDrawable.setColor(Color.parseColor(item.color))
-        }
+        gradientDrawable.setColor(
+            ContextCompat.getColor(
+                context,
+                color.colorResource
+            )
+        )
     }
 }
 
 @BindingAdapter("noteSubtitle")
 fun TextView.setNoteSubtitle(item: Note?) {
     item?.let {
-        if (item.subtitle.isEmpty()) {
+        if (item.subtitle == null || item.subtitle.isEmpty()) {
             visibility = View.GONE
         } else {
             visibility = View.VISIBLE
@@ -35,25 +39,23 @@ fun TextView.setNoteSubtitle(item: Note?) {
 }
 
 @BindingAdapter("noteDateTime")
-fun TextView.setNoteDateTime(item: Note?) {
-    item?.let {
+fun TextView.setNoteDateTime(dateTime: Calendar?) {
+    dateTime?.let {
         text = SimpleDateFormat(
             NOTE_TEXTUAL_DATETIME_PATTERN,
             Locale.getDefault()
         ).format(
-            item.datetime.time
+            dateTime.time
         )
     }
 }
 
 @BindingAdapter("noteImage")
-fun RoundedImageView.setNoteImage(item: Note?) {
-    item?.let {
-        visibility = if (item.imagePath.isNotEmpty()) {
-            setImageBitmap(BitmapFactory.decodeFile(item.imagePath))
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+fun ImageView.setNoteImage(imagePath: String?) {
+    visibility = if (imagePath == null || imagePath.isEmpty()) {
+        View.GONE
+    } else {
+        setImageBitmap(BitmapFactory.decodeFile(imagePath))
+        View.VISIBLE
     }
 }

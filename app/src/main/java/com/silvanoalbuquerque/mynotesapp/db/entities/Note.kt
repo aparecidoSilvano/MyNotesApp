@@ -4,15 +4,15 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.*
 
-@Entity(tableName = "notes_table")
+@Entity(tableName = "note")
 data class Note(
     @PrimaryKey(autoGenerate = true)
     val id: Long? = null,
-    val title: String,
-    val subtitle: String,
-    val datetime: Calendar,
-    val noteText: String,
-    val imagePath: String,
-    val color: String,
-    val webLink: String
+    val title: String? = null,
+    val subtitle: String? = null,
+    val datetime: Calendar? = null,
+    val noteText: String? = null,
+    val imagePath: String? = null,
+    val color: NoteColor? = null,
+    val webLink: String? = null
 )

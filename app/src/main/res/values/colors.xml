@@ -9,12 +9,13 @@
     <color name="colorQuickActionsBackground">#2F2D2E</color>
     <color name="colorIcons">#A4A4A4</color>
     <color name="colorTextSubtitle">#CECECE</color>
-    <color name="colorNoteDefault">#333333</color>
     <color name="colorSubtitleText">#FAFAFA</color>
     <color name="colorMiscellaneousBackground">#1F1F1F</color>
-    <color name="colorNote2">#FDBE3B</color>
-    <color name="colorNote3">#FF4842</color>
-    <color name="colorNote4">#3A52FC</color>
+    <color name="colorNoteDefault">#333333</color>
+    <color name="colorNote1">#FDBE3B</color>
+    <color name="colorNote2">#FF4842</color>
+    <color name="colorNote3">#3A52FC</color>
+    <color name="colorNote4">#333333</color>
     <color name="colorNote5">#000000</color>
     <color name="colorDelete">#FF4842</color>
     <color name="colorSearchBackground">#333333</color>

@@ -6,14 +6,18 @@
 
     <fragment
         android:id="@+id/listNotesFragment"
-        android:name="com.silvanoalbuquerque.mynotesapp.ui.fragments.ListNotesFragment"
+        android:name="com.silvanoalbuquerque.mynotesapp.ui.fragments.listnotes.ListNotesFragment"
         android:label="ListNotesFragment">
         <action
             android:id="@+id/action_listNotesFragment_to_createNoteFragment"
-            app:destination="@id/createNoteFragment" />
+            app:destination="@id/noteFragment" />
     </fragment>
     <fragment
-        android:id="@+id/createNoteFragment"
-        android:name="com.silvanoalbuquerque.mynotesapp.ui.fragments.CreateNoteFragment"
-        android:label="CreateNoteFragment" />
+        android:id="@+id/noteFragment"
+        android:name="com.silvanoalbuquerque.mynotesapp.ui.fragments.createnote.NoteFragment"
+        android:label="NoteFragment">
+        <argument
+            android:name="noteKey"
+            app:argType="long" />
+    </fragment>
 </navigation>

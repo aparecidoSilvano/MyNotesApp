@@ -1,4 +1,4 @@
-package com.silvanoalbuquerque.mynotesapp.ui.fragments
+package com.silvanoalbuquerque.mynotesapp.ui.customviews
 
 import android.content.Context
 import android.graphics.Rect

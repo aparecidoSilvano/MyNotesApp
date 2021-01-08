@@ -1,12 +1,12 @@
 package com.silvanoalbuquerque.mynotesapp.db
 
 import androidx.room.TypeConverter
+import com.silvanoalbuquerque.mynotesapp.db.entities.NoteColor
 import com.silvanoalbuquerque.mynotesapp.other.Constants.DATABASE_DATE_TIME_PATTERN
 import java.text.SimpleDateFormat
 import java.util.*
 
 class Converters {
-
     @TypeConverter
     fun toCalendar(dateStr: String?): Calendar? {
         return dateStr?.let {
@@ -31,5 +31,15 @@ class Converters {
 
             return dateFormat.format(date.time)
         }
+    }
+
+    @TypeConverter
+    fun fromNoteColor(color: NoteColor): String {
+        return color.name
+    }
+
+    @TypeConverter
+    fun toNoteColor(colorName: String): NoteColor {
+        return NoteColor.valueOf(colorName)
     }
 }

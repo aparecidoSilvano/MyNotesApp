@@ -11,12 +11,15 @@ interface NoteDAO {
     suspend fun insertNote(note: Note)
 
     @Transaction
-    @Query("SELECT * FROM notes_table ORDER BY id DESC")
+    @Query("SELECT * FROM note ORDER BY id DESC")
     fun getAllNotes(): LiveData<List<Note>>
 
     @Transaction
-    @Query("SELECT * FROM notes_table ORDER BY datetime")
+    @Query("SELECT * FROM note ORDER BY datetime")
     fun getAllNotesOrderedByDate(): LiveData<List<Note>>
+
+    @Query("SELECT * FROM note WHERE id =:noteId")
+    suspend fun getNoteById(noteId: Long): Note?
 
     @Delete
     suspend fun delete(note: Note)

@@ -23,7 +23,7 @@
         android:background="@drawable/background_note"
         android:onClick="@{() -> clickListener.onClick(note)}"
         android:orientation="vertical"
-        app:noteColor="@{note}">
+        app:noteColor="@{note.color}">
 
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/imageNote"
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:visibility="gone"
-            app:noteImage="@{note}"
+            app:noteImage="@{note.imagePath}"
             app:riv_corner_radius_top_left="@dimen/_10sdp"
             app:riv_corner_radius_top_right="@dimen/_10sdp" />
 
@@ -75,7 +75,7 @@
             android:includeFontPadding="false"
             android:textColor="@color/colorSubtitleText"
             android:textSize="@dimen/_7ssp"
-            app:noteDateTime="@{note}"
+            app:noteDateTime="@{note.datetime}"
             tools:text="data" />
 
     </LinearLayout>

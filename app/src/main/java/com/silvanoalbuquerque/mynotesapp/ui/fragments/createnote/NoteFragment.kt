@@ -1,11 +1,10 @@
-package com.silvanoalbuquerque.mynotesapp.ui.fragments
+package com.silvanoalbuquerque.mynotesapp.ui.fragments.createnote
 
 import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
@@ -14,47 +13,55 @@ import android.provider.MediaStore
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.silvanoalbuquerque.mynotesapp.R
-import com.silvanoalbuquerque.mynotesapp.db.entities.Note
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIFTH_INDEX
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIFTH_VALUE
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIRST_INDEX
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FIRST_VALUE
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FOURTH_INDEX
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_FOURTH_VALUE
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_SECOND_INDEX
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_SECOND_VALUE
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_THIRD_INDEX
-import com.silvanoalbuquerque.mynotesapp.other.Constants.COLOR_PICKER_THIRD_VALUE
+import com.silvanoalbuquerque.mynotesapp.databinding.FragmentNoteBinding
 import com.silvanoalbuquerque.mynotesapp.other.Constants.IMAGE_FILE_CURSOR_COLUMN_INDEX
-import com.silvanoalbuquerque.mynotesapp.other.Constants.NOTE_TEXTUAL_DATETIME_PATTERN
 import com.silvanoalbuquerque.mynotesapp.other.Constants.REQUEST_CODE_SELECT_IMAGE
 import com.silvanoalbuquerque.mynotesapp.other.Constants.REQUEST_CODE_STORAGE_PERMISSION
 import com.silvanoalbuquerque.mynotesapp.other.Constants.SELECTED_COLOR_DEFAULT_IMAGE_RESOURCE
-import com.silvanoalbuquerque.mynotesapp.ui.viewmodels.MainViewModel
+import com.silvanoalbuquerque.mynotesapp.other.hideKeyboard
+import com.silvanoalbuquerque.mynotesapp.ui.customviews.AutoCloseBottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_create_note.*
+import kotlinx.android.synthetic.main.fragment_note.*
 import kotlinx.android.synthetic.main.layout_add_url.*
 import kotlinx.android.synthetic.main.layout_miscellaneous.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 @AndroidEntryPoint
-class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
+class NoteFragment : Fragment(R.layout.fragment_note) {
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: NoteViewModel by viewModels()
     private var dialogAddURL: AlertDialog? = null
 
+    private lateinit var binding: FragmentNoteBinding
     private lateinit var availablePickers: List<ImageView>
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = DataBindingUtil.inflate(
+            inflater, R.layout.fragment_note, container, false
+        )
+        binding.viewModel = viewModel
+
+        val arguments = NoteFragmentArgs.fromBundle(requireArguments())
+        viewModel.loadNote(arguments.noteKey)
+
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -66,34 +73,10 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
     private fun initUi() {
         availablePickers = getAvailablePickers()
 
-        textDateTime.text =
-            SimpleDateFormat(NOTE_TEXTUAL_DATETIME_PATTERN, Locale.getDefault()).format(Date())
-
-        buttonSave.setOnClickListener { createNote() }
-        imageBack.setOnClickListener { backToNotesListView() }
-        handlePickColorClick()
-
-        val bottomSheetBehavior: BottomSheetBehavior<LinearLayout> =
+        bottomSheetBehavior =
             BottomSheetBehavior.from(layoutMiscellaneous) as AutoCloseBottomSheetBehavior
 
         layoutMiscellaneous.setOnClickListener { handleBottomSheetClick(bottomSheetBehavior) }
-
-        layoutAddImage.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-
-            if (ContextCompat.checkSelfPermission(
-                    requireContext().applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    REQUEST_CODE_STORAGE_PERMISSION
-                )
-            } else {
-                selectImage()
-            }
-        }
 
         layoutAddUrl.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -132,20 +115,9 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
         if (requestCode == REQUEST_CODE_SELECT_IMAGE && resultCode == RESULT_OK) {
             data?.let {
                 val selectedImageUri = it.data
+
                 if (selectedImageUri != null) {
-                    try {
-
-                        val inputStream =
-                            requireActivity().contentResolver.openInputStream(selectedImageUri)
-                        val bitmap = BitmapFactory.decodeStream(inputStream)
-                        imageNote.setImageBitmap(bitmap)
-                        imageNote.visibility = View.VISIBLE
-
-                        viewModel.setSelectedImagePath(getPathFromUrl(selectedImageUri))
-
-                    } catch (ex: Exception) {
-                        Toast.makeText(requireContext(), ex.message, Toast.LENGTH_SHORT).show()
-                    }
+                    viewModel.setSelectedImage(selectedImageUri, getPathFromUrl(selectedImageUri))
                 }
             }
         }
@@ -162,26 +134,89 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 selectImage()
             } else {
-                Snackbar.make(requireView(), R.string.alert_permisison_denied, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(
+                    requireView(),
+                    R.string.alert_permisison_denied,
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
         }
     }
 
     private fun setupViewModelObservables() {
+        viewModel.note.observe(viewLifecycleOwner) { note ->
+            binding.note = note
+
+            note.color?.let { color ->
+                markPicker(color.pickerIndex)
+            }
+        }
+
+        viewModel.selectedColor.observe(viewLifecycleOwner) {
+            if (it) {
+                viewModel.note.value.let { note ->
+                    val selectedColor = note?.color
+
+                    if (selectedColor != null) {
+                        markPicker(selectedColor.pickerIndex)
+
+                        val gradientDrawable = viewSubtitleIndicator.background as GradientDrawable
+                        gradientDrawable.setColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                selectedColor.colorResource
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
         viewModel.finishedSavingNote.observe(viewLifecycleOwner) {
             if (it) {
                 backToNotesListView()
             }
         }
 
-        viewModel.selectedColor.observe(viewLifecycleOwner) {
-            val gradientDrawable = viewSubtitleIndicator.background as GradientDrawable
-            gradientDrawable.setColor(Color.parseColor(it))
-        }
-
         viewModel.noteLink.observe(viewLifecycleOwner) {
             textWebURL.text = it
             layoutWebURL.visibility = View.VISIBLE
+        }
+
+        viewModel.openImageSelector.observe(viewLifecycleOwner) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+            if (ContextCompat.checkSelfPermission(
+                    requireContext().applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    REQUEST_CODE_STORAGE_PERMISSION
+                )
+            } else {
+                selectImage()
+            }
+        }
+
+        viewModel.selectedImage.observe(viewLifecycleOwner) { imageUri ->
+            try {
+                val inputStream =
+                    requireActivity().contentResolver.openInputStream(imageUri)
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                imageNote.setImageBitmap(bitmap)
+                imageNote.visibility = View.VISIBLE
+
+            } catch (ex: Exception) {
+                Toast.makeText(requireContext(), ex.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.navigateBack.observe(viewLifecycleOwner) {
+            if (it) {
+                backToNotesListView()
+            }
         }
     }
 
@@ -201,34 +236,7 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
         fifthImageColor
     )
 
-    private fun handlePickColorClick() {
-        firstViewColor.setOnClickListener {
-            markSelectedColor(COLOR_PICKER_FIRST_INDEX)
-            viewModel.setSelectedColor(COLOR_PICKER_FIRST_VALUE)
-        }
-
-        secondViewColor.setOnClickListener {
-            markSelectedColor(COLOR_PICKER_SECOND_INDEX)
-            viewModel.setSelectedColor(COLOR_PICKER_SECOND_VALUE)
-        }
-
-        thirdImageColor.setOnClickListener {
-            markSelectedColor(COLOR_PICKER_THIRD_INDEX)
-            viewModel.setSelectedColor(COLOR_PICKER_THIRD_VALUE)
-        }
-
-        fourthViewColor.setOnClickListener {
-            markSelectedColor(COLOR_PICKER_FOURTH_INDEX)
-            viewModel.setSelectedColor(COLOR_PICKER_FOURTH_VALUE)
-        }
-
-        fifthViewColor.setOnClickListener {
-            markSelectedColor(COLOR_PICKER_FIFTH_INDEX)
-            viewModel.setSelectedColor(COLOR_PICKER_FIFTH_VALUE)
-        }
-    }
-
-    private fun markSelectedColor(selectedIndex: Int) {
+    private fun markPicker(selectedIndex: Int) {
         for (i in availablePickers.indices) {
             if (selectedIndex == i) {
                 availablePickers[i].setImageResource(R.drawable.ic_done)
@@ -239,32 +247,8 @@ class CreateNoteFragment : Fragment(R.layout.fragment_create_note) {
     }
 
     private fun backToNotesListView() {
+        hideKeyboard(requireActivity())
         findNavController().popBackStack()
-    }
-
-    private fun createNote() {
-        val title = inputNoteTitle.text.toString()
-        if (title.isEmpty()) {
-            Snackbar.make(requireView(), R.string.alert_empty_note_title, Snackbar.LENGTH_LONG)
-                .show()
-            return
-        }
-
-        val subtitle = inputNoteSubtitle.text.toString()
-        val noteText = inputNote.text.toString()
-        val dateTime = Calendar.getInstance()
-
-        val note = Note(
-            title = title,
-            color = viewModel.selectedColor.value ?: COLOR_PICKER_FIRST_VALUE,
-            datetime = dateTime,
-            imagePath = viewModel.selectedImagePath.value ?: "",
-            subtitle = subtitle,
-            noteText = noteText,
-            webLink = viewModel.noteLink.value ?: ""
-        )
-
-        viewModel.insertNote(note)
     }
 
     private fun showAddURLDialog() {
